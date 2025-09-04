@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.model.BMI;
+import com.example.demo.response.ApiResponse;
+
 //@Controller
 @RestController
 @RequestMapping("/api")
@@ -59,7 +62,11 @@ public class ApiController {
 	 * }
 	 * */
 	
-	
-	
+	@GetMapping(value = "/bmi2", produces = "application/json;charset=utf-8")
+	public ApiResponse<BMI> bmi2(@RequestParam(name = "h") double h, @RequestParam double w) {
+		double bmiValue = w / Math.pow(h/100, 2);
+		BMI bmi = new BMI(h, w, bmiValue);
+		return ApiResponse.success("BMI 計算成功", bmi);
+	}
 		
 }
