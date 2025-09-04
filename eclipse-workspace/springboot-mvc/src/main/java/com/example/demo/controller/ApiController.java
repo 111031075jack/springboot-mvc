@@ -173,5 +173,14 @@ public class ApiController {
 		
 	}
 	
+	@GetMapping(value = "/student", produces = "application/json;charset=utf-8")
+	public ApiResponse<Map<Integer, Student>> findAllStudent(){
+		Map<Integer, Student> map = Map.of(1, new Student(1, "John", 20),
+											2, new Student(2, "Jack", 21),
+											3, new Student(3, "David", 22));
+		return new ApiResponse<>(true, map, "取得所有學生資料成功");
+		
+	}
+	
 	
 }
