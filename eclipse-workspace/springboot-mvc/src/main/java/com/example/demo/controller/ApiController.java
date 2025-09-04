@@ -4,11 +4,12 @@ import java.util.Map;
 
 //import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.example.demo.SpringbootMvcApplication;
 import com.example.demo.model.BMI;
+import com.example.demo.model.Student;
 import com.example.demo.model.Sugar;
 import com.example.demo.model.Water;
 import com.example.demo.response.ApiResponse;
@@ -18,12 +19,7 @@ import com.example.demo.response.ApiResponse;
 @RequestMapping("/api")
 public class ApiController {
 
-    private final SpringbootMvcApplication springbootMvcApplication;
-
-    ApiController(SpringbootMvcApplication springbootMvcApplication) {
-        this.springbootMvcApplication = springbootMvcApplication;
-    }
-	
+    
 	// 執行路徑: http://localhost:8080/api/hello
 	@GetMapping("/hello")
 	public String hello() {
@@ -151,6 +147,29 @@ public class ApiController {
 		Water data = new Water(weight, time, recommand, advice);
 		
 		return new ApiResponse<>(true, data, "每日水分需求計算成功");
+		
+	}
+	
+	/**
+	 * 請求參數: /student?id=1
+	 * 請求參數: /student?id=3
+	 * 
+	 * 路徑參數
+	 * 路徑: /student/1
+	 * 路徑: /student/3
+	 * 
+	 * */
+	@GetMapping(value = "/student/{id}", produces = "application/json;charset=utf-8")
+	public ApiResponse<Student> student(@PathVariable Integer id){
+		Map<Integer, Student> map = Map.of(1, new Student(1, "John", 20),
+											2, new Student(2, "Jack", 21),
+											3, new Student(3, "David", 22));
+		Student student = map.get(id);
+		if(student == null) {
+			return new ApiResponse<Student>(false, null, "查無學生資料");	
+		}
+		
+		return new ApiResponse<Student>(true, student, "取得學生資料成功");
 		
 	}
 	
