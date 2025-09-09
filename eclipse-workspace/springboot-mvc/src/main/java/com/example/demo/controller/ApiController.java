@@ -1,6 +1,9 @@
 package com.example.demo.controller;
 
+import java.util.IntSummaryStatistics;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 //import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.SpringbootMvcApplication;
 import com.example.demo.model.BMI;
 import com.example.demo.model.Student;
 import com.example.demo.model.Sugar;
@@ -18,6 +22,13 @@ import com.example.demo.response.ApiResponse;
 @RestController
 @RequestMapping("/api")
 public class ApiController {
+
+    private final SpringbootMvcApplication springbootMvcApplication;
+
+
+    ApiController(SpringbootMvcApplication springbootMvcApplication) {
+        this.springbootMvcApplication = springbootMvcApplication;
+    }
 
     
 	// 執行路徑: http://localhost:8080/api/hello
@@ -180,6 +191,51 @@ public class ApiController {
 											3, new Student(3, "David", 22));
 		return new ApiResponse<>(true, map, "取得所有學生資料成功");
 		
+	}
+	
+	/**
+	 * 同名多筆資料
+	 * 路徑: /ages?age=19&age=21&age=30
+	 * 請計算出平均年齡
+	 * 
+	 * */
+	
+	@GetMapping(value = "/ages", produces = "application/json;charset=utf-8")	
+	public ApiResponse<Map<String, Double>> getAvgOfAge(@RequestParam(name = "age", required = false) List<Integer> ages){
+		if(ages == null || ages.size() == 0) {
+			return new ApiResponse<Map<String,Double>>(false, null, "請輸入年齡資料");
+		}
+		double avg = ages.stream().mapToInt(Integer::intValue).average().getAsDouble();
+		return new ApiResponse<Map<String,Double>>(true, Map.of("平均年齡", avg), "取得平均年齡成功");
+	}
+	
+	/*
+	 * Lab 練習: 得到多筆 score 資料
+	 * 路徑: "/exam?score=80&score=100&score=50&score=70&score=30"
+	 * 網址: http://localhost:8080/api/exam?score=80&score=100&score=50&score=70&score=30
+	 * 請自行設計一個方法，此方法可以
+	 * 印出: 最高分=?、最低分=?、平均=?、總分=?、及格分數列出=?、不及格分數列出=?
+	 */
+	@GetMapping(value = "/exam", produces = "application/json;charset=utf-8")
+	public ApiResponse<Object> getExamInfo(@RequestParam(name = "score", required = false)List<Integer> scores ){
+		if(scores == null || scores.size() == 0) {
+			return new ApiResponse<>(false, null, "請輸入成績資料");
+		}
+		// 統計資料
+		IntSummaryStatistics stat = scores.stream().mapToInt(Integer::intValue).summaryStatistics();
+		// 利用 Collectors.partitioningBy
+		// key = true 及格 | key = false 不及格
+		Map<Boolean, List<Integer>> resultMap = scores.stream()
+				.collect(Collectors.partitioningBy(score -> score >= 60));
+		Object data = Map.of(
+				"最高分", stat.getMax(),
+				"最低分", stat.getMin(),
+				"平均", stat.getAverage(),
+				"總分", stat.getSum(),
+				"及格分數", resultMap.get(true),
+				"不及格分數", resultMap.get(false)
+		);
+		return new ApiResponse<>(true, data, "取得成績資料成功");
 	}
 	
 	
