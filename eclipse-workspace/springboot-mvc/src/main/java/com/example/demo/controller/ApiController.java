@@ -294,10 +294,13 @@ public class ApiController {
 		int start = (page - 1) * size;
 		int end = Math.min(start + size, books.size());
 		
+		if(start > books.size()) {
+			return new ApiResponse<List<Book>>(false, null, "page 或 size 輸入過大");
+		}
 		List<Book> subBooks = books.subList(start, end); // 該頁的書籍集合
 										  
 		if(subBooks.size() == 0) {
-			return new ApiResponse<List<Book>>(false, null, "此頁無資料");
+			return new ApiResponse<>(false, null, "此頁無資料");
 		}
 		return new ApiResponse<>(true, subBooks, "第" + page + "頁查詢成功");
 	}
